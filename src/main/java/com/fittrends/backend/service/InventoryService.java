@@ -31,8 +31,42 @@ public class InventoryService {
         return inventoryRepository.findById(id);
     }
 
+    // Get inventory by product ID
+    public Optional<Inventory> getInventoryByProductId(String productId) {
+        return inventoryRepository.findByProductId(productId);
+    }
+
     // Delete inventory
     public void deleteInventory(String id) {
         inventoryRepository.deleteById(id);
+    }
+
+    // Get low stock inventory (running inventory at or below threshold)
+    public List<Inventory> getLowStockInventory(int threshold) {
+        return inventoryRepository.findByRunningInventoryLessThanEqual(threshold);
+    }
+
+    // Reduce stock when an order is placed
+    public void reduceStock(String inventoryId, int quantity) {
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new RuntimeException("Inventory not found: " + inventoryId));
+
+        if (inventory.getRunningInventory() < quantity) {
+            throw new RuntimeException("Insufficient stock for inventory " + inventoryId
+                    + ". Available: " + inventory.getRunningInventory() + ", Requested: " + quantity);
+        }
+
+        inventory.setRunningInventory(inventory.getRunningInventory() - quantity);
+        inventory.setTotalSold(inventory.getTotalSold() + quantity);
+        inventoryRepository.save(inventory);
+    }
+
+    // Increase stock (restocking)
+    public void increaseStock(String inventoryId, int quantity) {
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new RuntimeException("Inventory not found: " + inventoryId));
+
+        inventory.setRunningInventory(inventory.getRunningInventory() + quantity);
+        inventoryRepository.save(inventory);
     }
 }

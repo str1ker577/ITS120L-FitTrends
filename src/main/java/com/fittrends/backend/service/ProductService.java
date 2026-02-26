@@ -35,4 +35,24 @@ public class ProductService {
     public void deleteProduct(String id) {
         productRepository.deleteById(id);
     }
+
+    // Search products by name (partial, case-insensitive)
+    public List<Product> searchProducts(String name) {
+        return productRepository.findByProductNameContainingIgnoreCase(name);
+    }
+
+    // Filter products by size
+    public List<Product> getProductsBySize(String size) {
+        return productRepository.findBySize(size);
+    }
+
+    // Filter products by collection
+    public List<Product> getProductsByCollection(String collection) {
+        return productRepository.findByCollection(collection);
+    }
+
+    // Search products by name and filter by size
+    public List<Product> searchProductsByNameAndSize(String name, String size) {
+        return productRepository.findByProductNameContainingIgnoreCaseAndSize(name, size);
+    }
 }

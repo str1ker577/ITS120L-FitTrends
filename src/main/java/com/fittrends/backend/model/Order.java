@@ -15,7 +15,7 @@ public class Order {
     private String id;
 
     private String buyerId;
-    private String platformId;
+    private String platform; // "SHOPEE" or "LAZADA"
 
     private LocalDate orderDate;
     private LocalDate deliveryDate;

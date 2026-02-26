@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class OrderItem {
 
-    private String productId;
-    private String size;
+    private String productId; // References a specific Product (which already has a size)
     private int quantity;
 }
