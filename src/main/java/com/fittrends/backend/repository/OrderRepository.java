@@ -19,4 +19,6 @@ public interface OrderRepository extends MongoRepository<Order, String> {
     List<Order> findAllByOrderByOrderDateDesc();
 
     List<Order> findByPlatformOrderByOrderDateDesc(String platform);
+
+    List<Order> findByOrderDateLessThanEqualAndItemsProductId(LocalDate asOf, String productId); //Added for Inventory Aging Logic
 }

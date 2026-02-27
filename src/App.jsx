@@ -42,8 +42,8 @@ function App() {
                     <Route path="/restocking/model" element={<ModelDecision />} />
                 </Route>
 
-                {/* Catch-all to redirect to login */}
-                <Route path="*" element={<Navigate to="/login" replace />} />
+                {/* Catch-all to redirect to home - TEMPORARILY DISABLED LOGIN */}
+                <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
         </BrowserRouter>
     );
