@@ -1,0 +1,35 @@
+/* Reports Module Specific Styles */
+
+.mb-4 {
+    margin-bottom: 24px;
+}
+
+.text-main {
+    color: var(--text-main, #102a43);
+}
+
+.text-muted {
+    color: var(--text-muted, #627d98);
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.progress-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border, #d9e2ec);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+}

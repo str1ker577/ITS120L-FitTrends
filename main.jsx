@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import LoginPage from './loginpage'
+import App from './src/App'
 import './style.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <LoginPage />
+        <App />
     </React.StrictMode>,
 )

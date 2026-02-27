@@ -1,0 +1,242 @@
+/* Inventory Module Specific Styles - These extend the global dashboard styles */
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Button Variants */
+.btn-primary {
+    background-color: #4b62f5;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #3f54d1;
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+}
+
+.btn-secondary {
+    background-color: white;
+    color: var(--text-main, #102a43);
+    border: 1px solid var(--border, #d9e2ec);
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-subtle, #f0f4f8);
+    border-color: #bcccdc;
+    transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+    transform: translateY(1px);
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--text-main, #102a43);
+    border: 1px solid var(--border, #d9e2ec);
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background-color: var(--bg-subtle, #f0f4f8);
+    transform: translateY(-1px);
+}
+
+.btn-outline:active {
+    transform: translateY(1px);
+}
+
+/* Table Card Styles */
+.table-card {
+    padding: 0;
+    /* Remove default card padding */
+    overflow: hidden;
+}
+
+.table-toolbar {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border, #d9e2ec);
+}
+
+/* Search Input */
+.search-wrapper {
+    position: relative;
+    width: 300px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted, #627d98);
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    border: 1px solid var(--border, #d9e2ec);
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus {
+    border-color: #4b62f5;
+}
+
+/* Data Table Styles */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th {
+    padding: 16px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted, #627d98);
+    border-bottom: 1px solid var(--border, #d9e2ec);
+    background-color: #f9fbfd;
+}
+
+.data-table td {
+    padding: 16px 24px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border, #d9e2ec);
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f9fbfd;
+}
+
+/* Table Specific Cell Formatting */
+.product-details-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.product-name {
+    font-weight: 600;
+    color: var(--text-main, #102a43);
+}
+
+.product-sku {
+    font-size: 12px;
+    color: var(--text-muted, #627d98);
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.text-muted {
+    color: var(--text-muted, #627d98);
+}
+
+/* Table Pagination */
+.table-pagination {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: var(--text-muted, #627d98);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-page {
+    padding: 6px 12px;
+    border: 1px solid var(--border, #d9e2ec);
+    background: white;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-main, #102a43);
+    cursor: pointer;
+}
+
+.btn-page:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f9fbfd;
+}
+
+.btn-page:not(:disabled):hover {
+    background-color: var(--bg-subtle, #f0f4f8);
+}
+
+/* Status Badges */
+.badge-warning-light {
+    background-color: #fff6e5;
+    color: #d97706;
+}
+
+.badge-danger-light {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.badge-info-light {
+    background-color: #eff6ff;
+    color: #2563eb;
+}
