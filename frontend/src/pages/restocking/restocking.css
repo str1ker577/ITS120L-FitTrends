@@ -1,0 +1,210 @@
+/* Restocking Module Specific Styles */
+
+.recommendations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.recommendation-card {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.rec-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rec-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rec-product-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary, #102a43);
+}
+
+.rec-reason {
+    font-size: 13px;
+    color: var(--text-muted, #627d98);
+}
+
+.rec-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stock-compare-row {
+    display: flex;
+    align-items: center;
+}
+
+.stock-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stock-label {
+    font-size: 12px;
+    color: var(--text-muted, #627d98);
+}
+
+.stock-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary, #102a43);
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.mx-4 {
+    margin: 0 32px;
+}
+
+.stock-divider {
+    width: 1px;
+    height: 40px;
+    background-color: var(--border, #d9e2ec);
+    margin: 0 40px;
+}
+
+.rec-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* ── Forecast Dashboard ─────────────────────────────────────────────────── */
+
+.forecast-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.forecast-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted, #627d98);
+    border-bottom: 2px solid var(--border, #d9e2ec);
+    white-space: nowrap;
+}
+
+.forecast-table td {
+    padding: 12px 12px;
+    border-bottom: 1px solid var(--border, #d9e2ec);
+    color: var(--text-main, #102a43);
+    vertical-align: middle;
+}
+
+.forecast-table tr:last-child td {
+    border-bottom: none;
+}
+
+.forecast-table tr:hover td {
+    background-color: #f8fafc;
+}
+
+.row-high-risk td {
+    background-color: #fff9f5;
+}
+
+.row-high-risk:hover td {
+    background-color: #fff3ea;
+}
+
+.product-name-cell {
+    font-weight: 500;
+    font-size: 12px;
+    max-width: 220px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Confidence bar */
+.confidence-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+}
+
+.confidence-bar-bg {
+    width: 60px;
+    height: 6px;
+    background-color: var(--border, #d9e2ec);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.confidence-bar-fill {
+    height: 100%;
+    background-color: #4b62f5;
+    border-radius: 3px;
+}
+
+.confidence-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted, #627d98);
+    min-width: 32px;
+}
+
+/* Forecast status badges */
+.forecast-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.badge-high-risk {
+    background-color: #fff0e8;
+    color: #e05c00;
+}
+
+.badge-restock {
+    background-color: #fff6ed;
+    color: #f2994a;
+}
+
+.badge-ok {
+    background-color: #e3f5eb;
+    color: #1f9d55;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border, #d9e2ec);
+    border-top-color: #4b62f5;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 0.8s linear infinite;
+}
