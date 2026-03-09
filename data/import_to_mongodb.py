@@ -1,18 +1,8 @@
-"""
-Import all generated CSV data into MongoDB.
-Handles Order + embedded OrderItems properly.
-
-Usage:
-  python import_to_mongodb.py
-
-Requires: pymongo
-  pip install pymongo
-"""
-
 import csv
 import os
 from pymongo import MongoClient
 from collections import defaultdict
+from bson.objectid import ObjectId
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_URI = "mongodb://localhost:27017"
@@ -21,25 +11,21 @@ DB_NAME = "fittrends_db"
 client = MongoClient(DB_URI)
 db = client[DB_NAME]
 
-
 def read_csv(filename):
     path = os.path.join(SCRIPT_DIR, filename)
     with open(path, "r", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
-
 def import_simple(collection_name, filename, type_casts=None):
-    """Import a simple CSV into a collection, applying type casts."""
     rows = read_csv(filename)
     if not rows:
         print(f"  ⚠ {filename} is empty, skipping")
         return
 
     for row in rows:
-        # Rename _id
         if "_id" in row:
-            row["_id"] = row["_id"]
-        # Apply type casts
+            row["_id"] = ObjectId(row["_id"])
+        
         if type_casts:
             for field, cast_fn in type_casts.items():
                 if field in row:
@@ -51,11 +37,9 @@ def import_simple(collection_name, filename, type_casts=None):
 
 
 def import_orders():
-    """Import orders with embedded OrderItems."""
     orders_raw = read_csv("orders.csv")
     items_raw = read_csv("order_items.csv")
 
-    # Group items by orderId
     items_by_order = defaultdict(list)
     for item in items_raw:
         items_by_order[item["orderId"]].append({
@@ -63,11 +47,10 @@ def import_orders():
             "quantity": int(item["quantity"]),
         })
 
-    # Build order documents with embedded items
     order_docs = []
     for o in orders_raw:
         doc = {
-            "_id": o["_id"],
+            "_id": ObjectId(o["_id"]),
             "buyerId": o["buyerId"],
             "platform": o["platform"],
             "orderDate": o["orderDate"],
@@ -76,6 +59,10 @@ def import_orders():
             "platformDiscount": float(o["platformDiscount"]),
             "netSales": float(o["netSales"]),
             "items": items_by_order.get(o["_id"], []),
+            # Added empty fields so models map correctly
+            "buyerName": "",
+            "buyerAddress": "",
+            "modeOfPayment": "Cash",
         }
         order_docs.append(doc)
 

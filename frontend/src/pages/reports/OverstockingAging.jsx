@@ -23,9 +23,9 @@ const OverstockingAging = () => {
 
                 inventory.forEach(inv => {
                     // Logic to simulate aging/overstock since DB might just have static snapshot
-                    const product = products.find(p => p.id === inv.productId) || { productName: 'Unknown', collection: 'Unknown' };
+                    const product = products.find(p => p.id === inv.productId) || { productName: 'Unknown', collection: 'Unknown', size: 'Unknown' };
                     
-                    const price = 399.0; // Base price
+                    const price = product.price || 399.0; // Use real price
                     const totalValue = inv.runningInventory * price;
                     
                     let status = 'Healthy';
@@ -40,21 +40,18 @@ const OverstockingAging = () => {
                         status = 'Stagnant'; // Or low stock
                     }
                     
-                    // Always add items over 100 stock to the table to show something
-                    if (inv.runningInventory > 100 || status !== 'Healthy') {
-                        tableData.push({
-                            id: inv.id,
-                            product: product.productName,
-                            sku: `Product-${product.id.substring(product.id.length-4)}`,
-                            daysInStock: Math.floor(Math.random() * 120) + 15, // Demo data for days
-                            quantity: inv.runningInventory,
-                            value: totalValue,
-                            status: status
-                        });
-                    }
+                    tableData.push({
+                        id: inv.id,
+                        product: product.productName,
+                        sku: `Size: ${product.size || 'N/A'}`,
+                        daysInStock: Math.floor(Math.random() * 120) + 15, // Demo data for days
+                        quantity: inv.runningInventory,
+                        value: totalValue,
+                        status: status
+                    });
                 });
                 
-                setReportData(tableData.slice(0, 15)); // top 15 issues
+                setReportData(tableData);
                 
                 setMetrics({
                     overstockValue: overstockVal,

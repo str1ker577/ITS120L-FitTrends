@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RefreshCw, Info, CheckCircle2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { retrainModel } from '../../api';
 import './restocking.css';
 
 const ModelDecision = () => {
@@ -14,7 +15,27 @@ const ModelDecision = () => {
     ];
 
     // Empty initial state ready for backend integration
-    const trainingHistory = [];
+    const [trainingHistory, setTrainingHistory] = useState([]);
+    const [isRetraining, setIsRetraining] = useState(false);
+
+    const handleRetrain = async () => {
+        try {
+            setIsRetraining(true);
+            const response = await retrainModel();
+            
+            setTrainingHistory(prev => [
+                { date: response.date, status: `Success (MAE: ${response.mae})` },
+                ...prev
+            ]);
+            
+            alert(response.status + ` Processed ${response.recordsProcessed} records.`);
+        } catch (error) {
+            console.error("Retrain error", error);
+            alert("Failed to retrain: " + error.message);
+        } finally {
+            setIsRetraining(false);
+        }
+    };
 
     return (
         <div className="page-wrapper" style={{ maxWidth: '900px', margin: '0 auto', gap: 32 }}>
@@ -24,8 +45,8 @@ const ModelDecision = () => {
                     <p className="page-subtitle">Understand how AI recommendations are generated</p>
                 </div>
                 <div className="header-actions">
-                    <button className="btn-primary">
-                        <RefreshCw size={16} /> Retrain Model
+                    <button className="btn-primary" onClick={handleRetrain} disabled={isRetraining}>
+                        <RefreshCw size={16} className={isRetraining ? "spin" : ""} /> {isRetraining ? 'Retraining...' : 'Retrain Model'}
                     </button>
                 </div>
             </div>

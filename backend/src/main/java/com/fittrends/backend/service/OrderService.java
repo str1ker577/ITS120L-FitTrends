@@ -31,9 +31,15 @@ public class OrderService {
         // Validate stock for each order item before saving
         if (order.getItems() != null) {
             for (OrderItem item : order.getItems()) {
+                // Auto-create inventory record if it doesn't exist yet (resilience fix)
                 Inventory inventory = inventoryRepository.findByProductId(item.getProductId())
-                        .orElseThrow(() -> new RuntimeException(
-                                "No inventory found for product: " + item.getProductId()));
+                        .orElseGet(() -> {
+                            Inventory newInv = new Inventory();
+                            newInv.setProductId(item.getProductId());
+                            newInv.setRunningInventory(0);
+                            newInv.setTotalSold(0);
+                            return inventoryRepository.save(newInv);
+                        });
 
                 if (inventory.getRunningInventory() < item.getQuantity()) {
                     throw new RuntimeException("Insufficient stock for product " + item.getProductId()

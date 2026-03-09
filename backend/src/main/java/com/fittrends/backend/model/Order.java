@@ -15,7 +15,10 @@ public class Order {
     private String id;
 
     private String buyerId;
+    private String buyerName;
+    private String buyerAddress;
     private String platform; // "SHOPEE" or "LAZADA"
+    private String modeOfPayment;
 
     private LocalDate orderDate;
     private LocalDate deliveryDate;
@@ -34,8 +37,17 @@ public class Order {
     public String getBuyerId() { return buyerId; }
     public void setBuyerId(String buyerId) { this.buyerId = buyerId; }
 
+    public String getBuyerName() { return buyerName; }
+    public void setBuyerName(String buyerName) { this.buyerName = buyerName; }
+
+    public String getBuyerAddress() { return buyerAddress; }
+    public void setBuyerAddress(String buyerAddress) { this.buyerAddress = buyerAddress; }
+
     public String getPlatform() { return platform; }
     public void setPlatform(String platform) { this.platform = platform; }
+
+    public String getModeOfPayment() { return modeOfPayment; }
+    public void setModeOfPayment(String modeOfPayment) { this.modeOfPayment = modeOfPayment; }
 
     public LocalDate getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDate orderDate) { this.orderDate = orderDate; }

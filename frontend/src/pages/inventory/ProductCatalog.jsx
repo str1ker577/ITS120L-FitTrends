@@ -15,8 +15,9 @@ const ProductCatalog = () => {
         collection: 'Urban Active',
         color: '',
         size: 'M',
+        price: 399,
         initialStock: 0,
-        description: '' // Collected but ignored by backend schema
+        description: ''
     });
 
     const loadCatalog = async () => {
@@ -40,10 +41,9 @@ const ProductCatalog = () => {
                     name: prod.productName,
                     sku: `${prod.collection.substring(0,3).toUpperCase()}-${prod.id.substring(prod.id.length-4)}`,
                     category: prod.collection,
-                    price: 399.0, // Base price used in generator
+                    price: prod.price || 399.0,
                     stock: inv.runningInventory,
                     status: stockStatus,
-                    // raw data for editing
                     rawProduct: prod,
                     rawInventory: inv
                 };
@@ -80,6 +80,7 @@ const ProductCatalog = () => {
                 collection: product.rawProduct.collection,
                 color: product.rawProduct.color,
                 size: product.rawProduct.size,
+                price: product.rawProduct.price || 399,
                 initialStock: product.rawInventory.runningInventory || 0,
                 description: ''
             });
@@ -91,6 +92,7 @@ const ProductCatalog = () => {
                 collection: 'Urban Active',
                 color: '',
                 size: 'M',
+                price: 399,
                 initialStock: 0,
                 description: ''
             });
@@ -115,33 +117,30 @@ const ProductCatalog = () => {
                 productName: formData.productName,
                 collection: formData.collection,
                 color: formData.color,
-                size: formData.size
+                size: formData.size,
+                price: parseFloat(formData.price) || 0
             };
 
             let savedProduct;
 
             if (isEditMode) {
                 savedProduct = await updateProduct(productPayload);
-                // Can't directly update stock on edit through product endpoint cleanly without custom inventory logic, 
-                // keeping it simple per instructions.
             } else {
                 savedProduct = await createProduct(productPayload);
-                
-                // Set initial stock if creating and stock > 0
-                if (parseInt(formData.initialStock, 10) > 0) {
-                     await updateInventory({
-                         productId: savedProduct.id,
-                         totalSold: 0,
-                         runningInventory: parseInt(formData.initialStock, 10)
-                     });
-                }
+
+                // Always create an inventory record (even at 0) so order recording never fails
+                await updateInventory({
+                    productId: savedProduct.id,
+                    totalSold: 0,
+                    runningInventory: parseInt(formData.initialStock, 10) || 0
+                });
             }
 
             handleCloseModal();
-            loadCatalog(); // Refresh list
+            loadCatalog();
         } catch (error) {
-            console.error("Error saving product:", error);
-            alert("Failed to save product. Check console.");
+            console.error('Error saving product:', error);
+            alert('Failed to save product. Check console.');
         }
     };
 
@@ -307,6 +306,19 @@ const ProductCatalog = () => {
                                         <option value="Yoga Essentials">Yoga Essentials</option>
                                         <option value="Lounge Comfort">Lounge Comfort</option>
                                     </select>
+                                </div>
+                                <div className="form-group mb-4">
+                                    <label className="form-label">Selling Price (₱)</label>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        name="price"
+                                        value={formData.price}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        step="0.01"
+                                        required
+                                    />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                     <div className="form-group">

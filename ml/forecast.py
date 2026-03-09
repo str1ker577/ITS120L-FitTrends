@@ -124,9 +124,7 @@ def create_features(df):
     df["sales_lag_1"] = df.groupby(sku_cols)["total_sold"].shift(1)
     df["target"]      = df.groupby(sku_cols)["total_sold"].shift(-1)
 
-    df = df.dropna().reset_index(drop=True)
     return df
-
 
 # ─── Model (VotingRegressor — identical to machine.ipynb) ────────────────────
 def build_model(numeric_features, categorical_features):
@@ -174,13 +172,19 @@ def forecast():
             if col not in df_feat.columns:
                 return jsonify({"error": f"Missing expected column: {col}"}), 500
 
-        model = build_model(numeric_features, categorical_features)
-        X = df_feat[numeric_features + categorical_features]
-        y = df_feat["target"]
-        model.fit(X, y)
+        # Drop rows missing target/lag for training ONLY
+        df_train = df_feat.dropna(subset=["target", "sales_lag_1"])
+        if df_train.empty:
+            return jsonify({"error": "Not enough training data (need at least 2 months of history)."}), 422
 
-        # 4. Predict demand
-        df_feat["pred_demand"] = model.predict(X).clip(min=0)
+        model = build_model(numeric_features, categorical_features)
+        X_train = df_train[numeric_features + categorical_features]
+        y_train = df_train["target"]
+        model.fit(X_train, y_train)
+
+        # 4. Predict demand for ALL rows (fill NA so predict doesn't crash on first rows)
+        X_all = df_feat[numeric_features + categorical_features].fillna(0)
+        df_feat["pred_demand"] = model.predict(X_all).clip(min=0)
 
         # 5. Inventory simulation (base-stock policy)
         z            = 1.28   # 90th-percentile safety factor
@@ -226,13 +230,17 @@ def forecast():
 
         results = []
         for _, row in latest.iterrows():
+            # Use 'running_inventory' here to get the live stock level, 
+            # NOT 'quantity_on_hand' which is only historical snapshot data!
+            live_stock = int(row.get("running_inventory", 0))
+            
             results.append({
                 "productName":     row["product_name"],
                 "size":            row["size"],
                 "collection":      row.get("collection", ""),
                 "color":           row.get("color", ""),
                 "snapshotDate":    str(row["snapshot_date"].date()),
-                "currentStock":    int(row["quantity_on_hand"]),
+                "currentStock":    live_stock,
                 "totalSold":       int(row["total_sold"]),
                 "predictedDemand": round(float(row["pred_demand"]), 1),
                 "reorderQty":      max(0, round(float(row["reorder_qty"]))),
@@ -241,11 +249,81 @@ def forecast():
                 "confidence":      confidence_pct(row["product_name"], row["size"]),
             })
 
+        # 8. Append untrained products
+        forecasted_skus = set((r["productName"], r["size"]) for r in results)
+        
+        for p in products:
+            p_name = p.get("productName", "Unknown")
+            p_size = p.get("size", "N/A")
+            sku = (p_name, p_size)
+            
+            if sku not in forecasted_skus:
+                inv_match = next((i for i in inventory if i.get("productId") == str(p.get("_id", ""))), None)
+                live_stock = int(inv_match.get("runningInventory", 0)) if inv_match else 0
+                total_sold = int(inv_match.get("totalSold", 0)) if inv_match else 0
+
+                results.append({
+                    "productName": p_name,
+                    "size": p_size,
+                    "collection": p.get("collection", ""),
+                    "color": p.get("color", ""),
+                    "snapshotDate": "-",
+                    "currentStock": live_stock,
+                    "totalSold": total_sold,
+                    "predictedDemand": 0,
+                    "reorderQty": 0,
+                    "lostSales": 0,
+                    "totalCost": 0.0,
+                    "confidence": 0,
+                })
+
         # Sort by reorderQty descending (most urgent first)
         results.sort(key=lambda x: x["reorderQty"], reverse=True)
 
         return jsonify(results)
 
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ─── Retrain endpoint ─────────────────────────────────────────────────────────
+@app.route("/retrain", methods=["POST"])
+def retrain():
+    try:
+        import datetime
+        from sklearn.metrics import mean_absolute_error
+        
+        snapshots, inventory, products = get_mongo_data()
+        if not snapshots or not inventory or not products:
+            return jsonify({"error": "No data found in MongoDB."}), 404
+            
+        df = prepare_dataframe(snapshots, inventory, products)
+        df_feat = create_features(df.copy())
+        
+        df_train = df_feat.dropna(subset=["target", "sales_lag_1"])
+        if df_train.empty:
+            return jsonify({"error": "Not enough historical data."}), 422
+            
+        numeric_features     = ["total_sold", "quantity_on_hand", "sales_lag_1"]
+        categorical_features = ["product_name", "size"]
+        
+        model = build_model(numeric_features, categorical_features)
+        X_train = df_train[numeric_features + categorical_features]
+        y_train = df_train["target"]
+        model.fit(X_train, y_train)
+        
+        preds = model.predict(X_train).clip(min=0)
+        mae = mean_absolute_error(y_train, preds)
+        
+        total_records = len(df_train)
+        run_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        return jsonify({
+            "status": "Success",
+            "date": run_date,
+            "mae": round(float(mae), 2),
+            "recordsProcessed": total_records
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

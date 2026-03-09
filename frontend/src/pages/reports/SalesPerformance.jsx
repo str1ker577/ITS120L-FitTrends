@@ -7,38 +7,60 @@ import './reports.css';
 const SalesPerformance = () => {
     const [revenueData, setRevenueData] = useState([]);
     const [profitData, setProfitData] = useState([]);
+    const [totalUnits, setTotalUnits] = useState(0);
+    const [timeRange, setTimeRange] = useState(30); // 7 or 30 days
 
     useEffect(() => {
         const loadReportData = async () => {
             try {
                 const orders = await fetchOrders();
                 
-                // Group orders by date for Revenue Chart (last 7 days simply)
-                const dateMap = {};
+                // Track total units across all orders
+                let units = 0;
                 orders.forEach(o => {
-                    const dateObj = new Date(o.orderDate);
-                    const day = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    
-                    if (!dateMap[day]) {
-                        dateMap[day] = 0;
+                    if (o.items && o.items.length > 0) {
+                        units += o.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                    } else {
+                        units += 1; // default to 1 if no items array
                     }
-                    dateMap[day] += o.netSales;
+                });
+                setTotalUnits(units);
+
+                const dateMap = {};
+                
+                // Group orders by date
+                orders.forEach(o => {
+                    let dateObj;
+                    if (Array.isArray(o.orderDate)) {
+                        dateObj = new Date(o.orderDate[0], o.orderDate[1] - 1, o.orderDate[2]);
+                    } else if (o.orderDate) {
+                        dateObj = new Date(o.orderDate);
+                    } else {
+                        return; // skip if no date
+                    }
+
+                    // Format as YYYY-MM-DD for sorting reliably
+                    const sortKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+                    const displayDay = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    
+                    if (!dateMap[sortKey]) {
+                        dateMap[sortKey] = { name: displayDay, value: 0, sortKey, dateObj };
+                    }
+                    dateMap[sortKey].value += (o.netSales || 0);
                 });
                 
-                // Convert Map to array and sort
-                const chartData = Object.keys(dateMap).map(day => ({
-                    name: day,
-                    value: dateMap[day]
-                }));
-                // Just take the last 7 items for the chart if we have more
-                setRevenueData(chartData.slice(-7));
+                // Convert Map to array and explicitly sort by date
+                let chartData = Object.values(dateMap).sort((a, b) => a.dateObj - b.dateObj);
 
-                // Let's reuse the chartData for profit (demo: profit is ~30% of revenue)
+                // Filter based on timeRange state
+                setRevenueData(chartData.slice(-timeRange));
+
+                // Reuse the sorted chartData for profit (demo: profit is ~30% of revenue)
                 const mappedProfitData = chartData.map(d => ({
                     name: d.name,
                     value: d.value * 0.3
                 }));
-                setProfitData(mappedProfitData.slice(-7));
+                setProfitData(mappedProfitData.slice(-timeRange));
 
             } catch (error) {
                 console.error("Error loading sales performance data", error);
@@ -46,7 +68,11 @@ const SalesPerformance = () => {
         };
 
         loadReportData();
-    }, []);
+    }, [timeRange]); // Re-run when timeRange changes
+
+    const toggleTimeRange = () => {
+        setTimeRange(prev => prev === 30 ? 7 : 30);
+    };
 
     return (
         <div className="page-wrapper">
@@ -56,8 +82,8 @@ const SalesPerformance = () => {
                     <p className="page-subtitle">Analytics dashboard for revenue and growth tracking</p>
                 </div>
                 <div className="header-actions">
-                    <button className="btn-secondary">
-                        <Calendar size={16} /> Last 30 Days
+                    <button className="btn-secondary" onClick={toggleTimeRange}>
+                        <Calendar size={16} /> {timeRange === 30 ? 'Last 30 Days' : 'Last 7 Days'}
                     </button>
                     <button className="btn-secondary" onClick={() => exportAllData()}>
                         <Download size={16} /> Download All Data
@@ -150,7 +176,7 @@ const SalesPerformance = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 32, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
                     <span className="text-muted" style={{ fontSize: 12 }}>Total Units Sold</span>
-                    <span className="font-medium text-main" style={{ fontSize: 14 }}>0</span>
+                    <span className="font-medium text-main" style={{ fontSize: 14 }}>{totalUnits}</span>
                 </div>
             </div>
         </div>

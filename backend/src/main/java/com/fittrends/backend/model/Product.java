@@ -15,6 +15,7 @@ public class Product {
     private String collection;
     private String color;
     private String size; // Each product+size combination is a unique product
+    private double price; // Selling price in PHP
 
     public Product() {}
 
@@ -32,4 +33,7 @@ public class Product {
 
     public String getSize() { return size; }
     public void setSize(String size) { this.size = size; }
+
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 }

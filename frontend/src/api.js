@@ -189,3 +189,13 @@ export const fetchForecast = async () => {
     return response.json();
 };
 
+export const retrainModel = async () => {
+    const response = await fetch(`${API_BASE_URL}/retrain`, {
+        method: 'POST'
+    });
+    if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || 'Failed to retrain model');
+    }
+    return response.json();
+};
