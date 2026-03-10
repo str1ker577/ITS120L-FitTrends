@@ -26,6 +26,14 @@ random.seed(42)  # Reproducible data
 
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Cleanup existing CSV files in OUTPUT_DIR to avoid duplicates
+for filename in os.listdir(OUTPUT_DIR):
+    if filename.endswith(".csv"):
+        try:
+            os.remove(os.path.join(OUTPUT_DIR, filename))
+        except OSError:
+            pass
+
 # ══════════════════════════════════════════════════════════════════════
 # 1. PRODUCTS — 5 designs × 4 sizes = 20 products
 # ══════════════════════════════════════════════════════════════════════
@@ -40,7 +48,7 @@ DESIGNS = [
 SIZES = ["S", "M", "L", "XL"]
 
 # Size popularity weights for order generation (M and L sell more)
-SIZE_WEIGHTS = {"S": 0.15, "M": 0.35, "L": 0.35, "XL": 0.15}
+SIZE_WEIGHTS = {"S": 0.10, "M": 0.40, "L": 0.40, "XL": 0.10}
 
 products = []
 for design_name, collection, color in DESIGNS:
@@ -109,7 +117,9 @@ TOWNS_PROVINCES = [
 buyers = []
 used_names = set()
 while len(buyers) < 70:
-    fn = random.choice(FIRST_NAMES)
+    num_fns = random.choices([1, 2, 3], weights=[0.65, 0.30, 0.05])[0]
+    chosen_fns = random.sample(FIRST_NAMES, num_fns)
+    fn = " ".join(chosen_fns)
     ln = random.choice(LAST_NAMES)
     full = f"{fn} {ln}"
     if full in used_names:
@@ -222,7 +232,14 @@ for month_idx, (year, month) in enumerate(MONTHS):
         available = [p for p in products if running_inv[p["_id"]] > 0]
         if not available:
             continue
-        chosen = random.sample(available, min(num_items, len(available)))
+        
+        # Sample items according to SIZE_WEIGHTS
+        chosen = []
+        for _ in range(min(num_items, len(available))):
+            weights = [float(SIZE_WEIGHTS.get(p["size"], 0.25)) for p in available]
+            p = random.choices(available, weights=weights)[0]
+            chosen.append(p)
+            available.remove(p)
 
         items = []
         gross = 0.0
