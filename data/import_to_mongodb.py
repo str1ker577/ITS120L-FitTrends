@@ -5,7 +5,7 @@ from collections import defaultdict
 from bson.objectid import ObjectId
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_URI = "mongodb://localhost:27017"
+DB_URI = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
 DB_NAME = "fittrends_db"
 
 client = MongoClient(DB_URI)

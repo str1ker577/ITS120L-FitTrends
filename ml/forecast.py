@@ -7,9 +7,11 @@ Run:
     python forecast.py
 
 Endpoint:
-    GET http://localhost:5000/forecast
+    GET  http://localhost:5000/forecast
+    POST http://localhost:5000/retrain
 """
 
+import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
@@ -27,7 +29,8 @@ app = Flask(__name__)
 CORS(app)  # Allow requests from React (port 5173) and Spring Boot (port 8080)
 
 # ─── MongoDB connection ───────────────────────────────────────────────────────
-MONGO_URI = "mongodb://localhost:27017/"
+# Read from environment variable (set on Railway); fallback to localhost for dev.
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME = "fittrends_db"
 
 def get_mongo_data():
@@ -329,9 +332,11 @@ def retrain():
 
 
 if __name__ == "__main__":
+    # Railway sets the PORT env var; fall back to 5000 for local dev.
+    port = int(os.environ.get("PORT", 5000))
     print("=" * 60)
     print("  FitTrends ML Forecast Server")
-    print("  Listening on http://localhost:5000")
-    print("  Endpoint: GET /forecast")
+    print(f"  Listening on http://0.0.0.0:{port}")
+    print("  Endpoints: GET /forecast | POST /retrain")
     print("=" * 60)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)

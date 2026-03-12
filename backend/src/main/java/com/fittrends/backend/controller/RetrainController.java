@@ -5,35 +5,46 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 @RestController
-@RequestMapping("/api/forecast")
-public class ForecastController {
+@RequestMapping("/api/retrain")
+public class RetrainController {
 
     @Value("${ml.server.url:http://localhost:5000}")
     private String mlServerUrl;
 
     private final RestTemplate restTemplate;
 
-    public ForecastController() {
+    public RetrainController() {
         this.restTemplate = new RestTemplate();
     }
 
     /**
-     * Proxies the forecast request to the Python Flask ML server.
-     * The Flask server reads live data from MongoDB, runs the VotingRegressor
-     * ensemble model, and returns per-SKU demand forecasts as JSON.
+     * Proxies the retrain request to the Python Flask ML server.
+     * The Flask server retrains the VotingRegressor on all available data
+     * and returns MAE + records processed.
      *
-     * GET /api/forecast
+     * POST /api/retrain
      */
-    @GetMapping
-    public ResponseEntity<String> getForecast() {
+    @PostMapping
+    public ResponseEntity<String> retrain() {
         try {
-            String url = mlServerUrl + "/forecast";
-            String result = restTemplate.getForObject(url, String.class);
-            return ResponseEntity.ok()
+            String url = mlServerUrl + "/retrain";
+
+            // Send an empty POST body
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>("{}", headers);
+
+            ResponseEntity<String> mlResponse = restTemplate.postForEntity(url, entity, String.class);
+
+            return ResponseEntity.status(mlResponse.getStatusCode())
                     .header("Content-Type", "application/json")
-                    .body(result);
+                    .body(mlResponse.getBody());
+
         } catch (ResourceAccessException e) {
             return ResponseEntity.status(503).body(
                     "{\"error\": \"ML server is not running. Please start forecast.py on port 5000.\"}");
