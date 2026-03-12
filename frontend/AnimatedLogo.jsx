@@ -24,7 +24,7 @@ export default function AnimatedLogo({ animationStage }) {
         ease: [0.16, 1, 0.3, 1]
       }}
     >
-      <img src="./pics/LOGO.png" alt="WYS Logo" className="logo-image" />
+      <img src="/LOGO.png" alt="WYS Logo" className="logo-image" />
       <span className="logo-text">FitTrends</span>
     </motion.div>
   );
