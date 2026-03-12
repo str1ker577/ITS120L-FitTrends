@@ -1,0 +1,14 @@
+[providers.java]
+setup = [
+    "apt-get update",
+    "apt-get install -y openjdk-17-jdk maven"
+]
+
+[variables]
+JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
+
+[phases.build]
+cmds = ["mvn clean package -DskipTests"]
+
+[phases.start]
+cmd = "java -server -Dserver.port=$PORT -jar target/*.jar"
