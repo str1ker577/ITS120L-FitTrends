@@ -10,12 +10,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class SpaController {
 
-    // Match everything that does NOT contain a period (so it ignores .js, .css,
-    // etc)
-    // and does NOT start with /api (so backend endpoints still work)
-    @RequestMapping(value = { "/", "/{x:[\\w\\-]+}", "/{x:^(?!api$).*$}/**/{y:[\\w\\-]+}" })
+    /**
+     * Catch all frontend routes (single and two-level deep) that are NOT
+     * API calls and do NOT have a file extension (assets are handled by Spring's
+     * static resource handler automatically).
+     */
+    @RequestMapping(value = {
+            "/",
+            "/{p1:[^\\.]*}",
+            "/{p1:[^\\.]*}/{p2:[^\\.]*}",
+            "/{p1:[^\\.]*}/{p2:[^\\.]*}/{p3:[^\\.]*}"
+    })
     public String serveReact() {
-        // Automatically forward to the embedded static index.html
         return "forward:/index.html";
     }
 }
